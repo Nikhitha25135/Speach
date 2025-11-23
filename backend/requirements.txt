@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+numpy
+openpyxl
+nltk
+sentence-transformers
+transformers
+language-tool-python
+python-multipart
