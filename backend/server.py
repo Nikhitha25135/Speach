@@ -1,32 +1,49 @@
 from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+import os
 
 # Import AI model functions
 from ai_model import load_rubric, evaluate_transcript
 
 # ---------------------------------------
-# LOAD RUBRIC ONCE WHEN SERVER STARTS
+# LOAD RUBRIC ONCE
 # ---------------------------------------
-rubric_struct, overall_weights = load_rubric("Case study for interns.xlsx")
+RUBRIC_PATH = "Case study for interns.xlsx"
 
+if not os.path.exists(RUBRIC_PATH):
+    raise FileNotFoundError(f"Rubric file not found at: {RUBRIC_PATH}")
+
+rubric_struct, overall_weights = load_rubric(RUBRIC_PATH)
+
+# ---------------------------------------
+# FASTAPI APP
+# ---------------------------------------
 app = FastAPI()
 
-# Enable CORS for your frontend
+# Enable CORS for frontend (React/Vite)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],       # allow all for local dev
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ---------------------------------------
+# ROUTES
+# ---------------------------------------
+
+@app.get("/")
+def home():
+    return {"message": "Speech Evaluation Backend Running ✔"}
+
 @app.post("/evaluate")
 def evaluate_api(
     transcript: str = Form(...),
-    duration: str = Form(None)
+    duration: str = Form(None),
 ):
-    # Convert duration to float
+    # Convert duration to float safely
     try:
         dur = float(duration) if duration else None
     except:
@@ -46,13 +63,14 @@ def evaluate_api(
         "meta": meta
     }
 
-
-# ----------------------------
-# PRODUCTION SERVER FOR RENDER
-# ----------------------------
+# ---------------------------------------
+# RUN LOCAL SERVER
+# ---------------------------------------
 if __name__ == "__main__":
     uvicorn.run(
         "server:app",
-        host="0.0.0.0",
-        port=10000    # Render requires port 10000
+        host="127.0.0.1",
+        port=8000,
+        reload=True
     )
+
