@@ -47,11 +47,12 @@ def evaluate_api(
     }
 
 
-# Run server only when executed directly (fix for Windows)
+# ----------------------------
+# PRODUCTION SERVER FOR RENDER
+# ----------------------------
 if __name__ == "__main__":
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True
+        port=10000    # Render requires port 10000
     )
